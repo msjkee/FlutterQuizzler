@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'quiz_brain.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
 class Quizzler extends StatelessWidget {
+  const Quizzler({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,6 +33,27 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Widget> scoreKeeper = [];
+
+  void answerChecker (bool userAnswer) {
+    bool correctAnswer = quizBrain.getQuestionAnswer();
+
+    setState(() {
+      if (quizBrain.isFinished() == true) {
+        Alert(context: context, title: 'WARNING', desc: 'Please start the quiz again!').show();
+        scoreKeeper.clear();
+        quizBrain.resetQuiz();
+      } else {
+        if (userAnswer == correctAnswer) {
+          scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+        } else {
+          scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+        }
+        quizBrain.nextQuestion();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -39,7 +66,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 25.0, color: Colors.white),
               ),
@@ -55,7 +82,7 @@ class _QuizPageState extends State<QuizPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
               onPressed: () {
-                //TRUE
+                answerChecker(true);
               },
               child: Text(
                 'True',
@@ -77,7 +104,7 @@ class _QuizPageState extends State<QuizPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
               ),
               onPressed: () {
-                //FALSE
+                answerChecker(false);
               },
               child: Text(
                 'False',
@@ -90,6 +117,9 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
+        Row(
+          children: scoreKeeper,
+        )
       ],
     );
   }
